@@ -10,6 +10,8 @@ class Stopwatch extends AutoCloseable {
   /**
    * Return the elapased time of this lap (in milliseconds)
    *
+   * NOTE: lap is NOT a pure function. It has the side effect of updating lapStart
+   *
    * @return a Long value of milliseconds
    */
   def lap: Int = {
@@ -21,10 +23,8 @@ class Stopwatch extends AutoCloseable {
   }
 
   def stop: (Int,Int) = {
-    if (lapStart == 0) throw StopwatchException("Stopwatch has stopped")
-    val current = System.nanoTime()
-    val lapTime = current - lapStart
-    val totalTime = current - start
+    val lapTime: Int = lap // NOTE side-effect
+    val totalTime = lapStart - start
     lapStart = 0L
     (lapTime, totalTime) // implicitly converts to milliseconds
   }
