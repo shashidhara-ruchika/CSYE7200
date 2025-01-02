@@ -51,6 +51,8 @@ case class Production(country: String, budget: Int, gross: Int, titleYear: Int) 
     case Production("New Zealand", _, _, _) => true
     case _ => false
   }
+
+  def isCheap: Boolean = budget < 1000
 }
 
 /**
@@ -105,12 +107,22 @@ object Movie extends App {
     }
   }
 
-  val ingester = new Ingest[Movie]()
-  if (args.length > 0) {
-    val source = Source.fromFile(args.head)
-    val kiwiMovies = for (my <- ingester(source)) yield for (m <- my; if m.production.isKiwi) yield m
-    kiwiMovies foreach (_ foreach println)
-    source.close()
+  val movies = doMain(args.head)
+  println(s"There are $movies Kiwi movies")
+
+  private def doMain(filename: String): Int = {
+    if (args.length > 0) {
+      lazy val ingester = new Ingest[Movie]()
+      val source = Source.fromFile(filename)
+      val triedMovies: Iterator[Try[Movie]] = for (my <- ingester(source)) yield for (m <- my; if m.production.isKiwi) yield m
+      val optionalMovies: Seq[Option[Movie]] = triedMovies to List map (_.toOption)
+      val kiwiMovies: Option[Seq[Movie]] = sequenceOptimistic(optionalMovies)
+      kiwiMovies foreach (_ foreach println)
+      source.close()
+      kiwiMovies.getOrElse(Nil).size
+    }
+    else
+      throw new Exception("Syntax: Movie filename")
   }
 
   /**
@@ -152,6 +164,43 @@ object Movie extends App {
     val imdb = ws(17)
     Movie(title, format, production, reviews, director, actor1, actor2, actor3, genres, plotKeywords, imdb)
   }
+
+  def sequence[X](xys: Seq[Try[X]]): Try[Seq[X]] = xys.foldLeft(Try(Seq[X]())) {
+    (xsy, xy) => for (xs <- xsy; x <- xy) yield xs :+ x
+  }
+
+  /**
+   * This method will take a sequence of Option[X] and return an option of Seq[X].
+   * It is pessimistic: if any of the input elements are None, the result will be None.
+   *
+   * @param xos a Seq of Option[X].
+   * @tparam X the underlying type.
+   * @return an Option of Seq[X].
+   */
+  def sequencePessimistic[X](xos: Seq[Option[X]]): Option[Seq[X]] = xos.foldLeft(Option(Seq[X]())) {
+    (xso, xo) => for (xs <- xso; x <- xo) yield xs :+ x
+  }
+
+  /**
+   * This method will take a sequence of Option[X] and return an option of Seq[X].
+   * It is optimistic: if any of the input elements are Some(...), the result will be Some(...).
+   * otherwise, if all the input elements are None, the result will be None.
+   *
+   * @param xos a Seq of Option[X].
+   * @tparam X the underlying type.
+   * @return an Option of Seq[X].
+   */
+  def sequenceOptimistic[X](xos: Seq[Option[X]]): Option[Seq[X]] = xos.foldLeft[Option[Seq[X]]](None) {
+    (xso: Option[Seq[X]], xo: Option[X]) =>
+      xo match {
+        case None => xso
+        case Some(x) => xso match {
+          case Some(xs) => Some(xs :+ x)
+          case None => Some(Seq(x))
+        }
+      }
+  }
+
 }
 
 object Format {
@@ -200,17 +249,20 @@ object Rating {
   private val rRating = """^(\w*)(-(\d\d))?$""".r
 
   /**
-   * Alternative apply method for the Rating class such that a single String is decoded
+   * Alternative apply method for the Rating class such that a single String is decoded.
+   * We should explicitly reject any of the following strings for the rating (including the null pointer):
+   * "Unrated", "Approved", "Not Rated", "", "NULL"
    *
    * @param s a String made up of a code, optionally followed by a dash and a number, e.g. "R" or "PG-13"
    * @return a Rating
    */
-  // Hint: This should similar to apply method in Object Name. The parameter of apply in case match should be same as case class Rating
+  // Hint: This should be similar to the apply method in Object Name. The parameter of apply in case match should be same as case class Rating
   // 13 points
-  def apply(s: String): Rating = {
+  def apply(s: String): Rating = s match {
+    case rRating("Unrated" | "Approved" | "Not Rated" | "" | "NULL" | null, _, _) => throw ParseException(s"parse error in Rating: $s")
 // TO BE IMPLEMENTED 
-     ???
-    // END
+// END
+    case _ => throw ParseException(s"parse error in Rating: $s")
   }
 }
 

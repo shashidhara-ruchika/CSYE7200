@@ -24,7 +24,7 @@ class RationalParser extends JavaTokenParsers {
   }
 
   case class WholeNumber(sign: Boolean, digits: String) extends RationalNumber {
-    override def value: Try[Rational] = scala.util.Success(Rational(BigInt(digits)).applySign(sign))
+    def value: Try[Rational] = scala.util.Success(Rational(BigInt(digits)).applySign(sign))
   }
 
   object WholeNumber {
@@ -32,18 +32,18 @@ class RationalParser extends JavaTokenParsers {
   }
 
   case class RatioNumber(numerator: WholeNumber, denominator: WholeNumber) extends RationalNumber {
-    override def value: Try[Rational] = for (n <- numerator.value; d <- denominator.value) yield n / d
+    def value: Try[Rational] = for (n <- numerator.value; d <- denominator.value) yield n / d
   }
 
   case class RealNumber(sign: Boolean, integerPart: String, fractionalPart: String, exponent: Option[String]) extends RationalNumber {
-    override def value: Try[Rational] = {
+    def value: Try[Rational] = {
       val bigInt = BigInt(integerPart + fractionalPart)
       val exp = exponent.getOrElse("0").toInt
       Try(Rational(bigInt).applySign(sign).applyExponent(exp - fractionalPart.length))
     }
   }
 
-  def rationalNumber: Parser[RationalNumber] = realNumber | ratioNumber
+  def rationalNumber: Parser[RationalNumber] = realNumber | ratioNumber | failure("rationalNumber: did not match realNumber or ratioNumber")
 
   def ratioNumber: Parser[RatioNumber] = simpleNumber ~ opt("/" ~> simpleNumber) ^^ { case n ~ maybeD => RatioNumber(n, maybeD.getOrElse(WholeNumber.one)) }
 
@@ -57,7 +57,7 @@ class RationalParser extends JavaTokenParsers {
 object RationalParser {
   val parser = new RationalParser
 
-  def parse(s: String): Try[Rational] = parser.parse(parser.rationalNumber, s).flatMap(_.value)
+  def parse(s: String): Try[Rational] = parser parse(parser.rationalNumber, s) flatMap (_.value)
 }
 
 case class RationalParserException(m: String) extends Exception(m)

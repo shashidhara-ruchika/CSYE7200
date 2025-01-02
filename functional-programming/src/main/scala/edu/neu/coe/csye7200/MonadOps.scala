@@ -139,4 +139,20 @@ object MonadOps {
   def liftOption[T, U](f: T => U): Option[T] => Option[U] = _ map f
 
   def liftFuture[T, U](f: T => U)(implicit executor: ExecutionContext): Future[T] => Future[U] = _ map f
+
+  // NOTE: not really sure why these are here.
+  def pure[Z](z: => Z): Option[Z] = Option(z)
+
+  def flatMap[X, Z](xo: Option[X])(f: X => Option[Z]): Option[Z] = xo flatMap f
+
+  def map[X, Z](xo: Option[X])(f: X => Z): Option[Z] = xo flatMap (x => pure(f(x)))
+
+  def map0[Z]()(f: () => Z): Option[Z] = pure(f())
+
+  def map1[X, Z](xo: Option[X])(f: X => Z): Option[Z] = xo map f
+
+  def map2[X, Y, Z](xw: Option[X], yw: Option[Y])(f: (X, Y) => Z): Option[Z] = xw flatMap (x => yw.map(f(x, _)))
+
+  def map3[V, X, Y, Z](vw: Option[V], xw: Option[X], yw: Option[Y])(f: (V, X, Y) => Z): Option[Z] =
+    vw flatMap (v => xw flatMap (x => yw map (f(v, x, _))))
 }

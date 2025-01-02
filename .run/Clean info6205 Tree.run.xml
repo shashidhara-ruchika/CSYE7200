@@ -1,9 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Clean info6205 Tree" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="edu.neu.coe.csye7200.util.CleanTree" />
-    <module name="LabParser" />
-    <option name="PROGRAM_PARAMETERS"
-            value="$PROJECT_DIR$/../INFO6205 $PROJECT_DIR$/../INFO6205_Student_Branch &quot;SOLUTION&quot; SKELETON"/>
+    <option name="PROGRAM_PARAMETERS" value="$PROJECT_DIR$/../INFO6205/src $PROJECT_DIR$/../DSAIPG/src &quot;SOLUTION&quot; SKELETON" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/lab-parser" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="edu.neu.coe.csye7200.util.*" />

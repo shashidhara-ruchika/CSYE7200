@@ -6,8 +6,7 @@ import scala.collection.immutable.Seq
 class MergeSortEager[X: Ordering] {
 
     def sort(xs: List[X]): List[X] = xs match {
-        case Nil => xs
-        case _ :: Nil => xs
+        case Nil | _ :: Nil => xs
         case _ =>
             @tailrec
             def merge(result: List[X], l: List[X], r: List[X]): List[X] =

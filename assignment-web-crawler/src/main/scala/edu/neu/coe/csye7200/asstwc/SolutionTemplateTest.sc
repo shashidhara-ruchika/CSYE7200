@@ -1,5 +1,6 @@
 import Helper.{createURL, validateURL}
 import edu.neu.coe.csye7200.asstwc._
+import edu.neu.coe.csye7200.asstwc.fp.FP
 import java.net.{MalformedURLException, URL}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.{BufferedSource, Source}
@@ -26,9 +27,9 @@ def wget(url: URL)(implicit ec: ExecutionContext): Future[Seq[URL]] = {
 
   def getLinks(g: String): Try[Seq[URL]] = {
     val ny: Try[Node] = HTMLParser.parse(g) recoverWith { case f => Failure(new RuntimeException(s"parse problem with URL $url: $f")) }
-    for (n <- ny; uys = getURLs(n); us <- MonadOps.sequenceForgiveSubsequent(uys) { case _: WebCrawlerProtocolException => true; case _ => false }) yield us
+    for (n <- ny; uys = getURLs(n); us <- FP.sequenceForgiveSubsequent(uys) { case _: WebCrawlerProtocolException => true; case _ => false }) yield us
   }
-  // Hint: write as a for-comprehension, using getURLContent (above) and getLinks above. You will also need MonadOps.asFuture
+  // Hint: write as a for-comprehension, using getURLContent (above) and getLinks above. You will also need FP.asFuture
   // 9 points.
 
   // TO BE IMPLEMENTED 
@@ -43,8 +44,8 @@ def wget(url: URL)(implicit ec: ExecutionContext): Future[Seq[URL]] = {
    */
   def getURLContent(u: URL)(implicit ec: ExecutionContext): Future[String] =
     for {
-      s <- MonadOps.asFuture(SourceFromURL(u))
-      w <- MonadOps.asFuture(sourceToString(s, s"Cannot read from source at $u"))
+      s <- FP.asFuture(SourceFromURL(u))
+      w <- FP.asFuture(sourceToString(s, s"Cannot read from source at $u"))
     } yield w
 
   def SourceFromURL(resource: URL): Try[BufferedSource] = Try(Source.fromURL(resource))

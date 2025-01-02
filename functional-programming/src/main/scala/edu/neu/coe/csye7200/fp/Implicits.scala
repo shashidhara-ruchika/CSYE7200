@@ -1,4 +1,4 @@
-package edu.neu.coe.csye7200
+package edu.neu.coe.csye7200.fp
 
 import scala.language.implicitConversions
 

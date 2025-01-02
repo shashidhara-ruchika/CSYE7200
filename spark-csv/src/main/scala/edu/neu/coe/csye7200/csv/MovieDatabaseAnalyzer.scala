@@ -2,7 +2,6 @@ package edu.neu.coe.csye7200.csv
 
 import edu.neu.coe.csye7200.csv.tableParser.TableDatasetParser
 import org.apache.spark.sql.{Dataset, SparkSession}
-
 import scala.util.Try
 
 /**

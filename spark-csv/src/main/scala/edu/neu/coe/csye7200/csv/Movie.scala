@@ -117,20 +117,20 @@ case class Rating(code: String, age: Option[Int]) {
 
 object MovieParser extends CellParsers {
 
-  def camelCaseColumnNameMapper(w: String): String = w.replaceAll("([A-Z0-9])", "_$1")
+  private val camelCaseColumnNameMapper: String => String = _.replaceAll("([A-Z0-9])", "_$1")
 
-  implicit val movieColumnHelper: ColumnHelper[Movie] = columnHelper(camelCaseColumnNameMapper _,
+  implicit val movieColumnHelper: ColumnHelper[Movie] = columnHelper(camelCaseColumnNameMapper,
     "title" -> "movie_title",
     "imdb" -> "movie_imdb_link")
-  implicit val reviewsColumnHelper: ColumnHelper[Reviews] = columnHelper(camelCaseColumnNameMapper _,
+  implicit val reviewsColumnHelper: ColumnHelper[Reviews] = columnHelper(camelCaseColumnNameMapper,
     "facebookLikes" -> "movie_facebook_likes",
     "numUsersReview" -> "num_user_for_reviews",
     "numUsersVoted" -> "num_voted_users",
     "numCriticReviews" -> "num_critic_for_reviews",
     "totalFacebookLikes" -> "cast_total_facebook_likes")
-  implicit val formatColumnHelper: ColumnHelper[Format] = columnHelper(camelCaseColumnNameMapper _)
-  implicit val productionColumnHelper: ColumnHelper[Production] = columnHelper(camelCaseColumnNameMapper _)
-  implicit val principalColumnHelper: ColumnHelper[Principal] = columnHelper(camelCaseColumnNameMapper _, Some("$x_$c"))
+  implicit val formatColumnHelper: ColumnHelper[Format] = columnHelper(camelCaseColumnNameMapper)
+  implicit val productionColumnHelper: ColumnHelper[Production] = columnHelper(camelCaseColumnNameMapper)
+  implicit val principalColumnHelper: ColumnHelper[Principal] = columnHelper(camelCaseColumnNameMapper, Some("$x_$c"))
   implicit val ratingParser: CellParser[Rating] = cellParser(Rating.apply: String => Rating)
   implicit val formatParser: CellParser[Format] = cellParser4(Format)
   implicit val productionParser: CellParser[Production] = cellParser4(Production)
@@ -147,7 +147,7 @@ object MovieParser extends CellParsers {
     override val listEnclosure: String = ""
   }
 
-  implicit val parser: StandardRowParser[Movie] = StandardRowParser[Movie]
+  implicit val parser: StandardRowParser[Movie] = StandardRowParser.create[Movie]
 
   implicit object MovieTableParser extends StringTableParser[Table[Movie]] {
     protected def builder(rows: Iterable[Movie], header: Header): Table[Movie] = HeadedTable(rows, header)
@@ -161,6 +161,8 @@ object MovieParser extends CellParsers {
     val rowParser: RowParser[Row, String] = implicitly[RowParser[Row, String]]
 
     protected def builder(rows: Iterator[Movie], header: Header): Table[Row] = HeadedTable(rows, header)
+
+    val headerRowsToRead: Int = 1
   }
 
 }

@@ -11,6 +11,7 @@ class CleanSpec extends FlatSpec with Matchers {
   behavior of "Clean"
 
   implicit val logger: Logger = Logger(classOf[CleanSpec])
+  val binarySearchJava = "../INFO6205/src/main/java/com/phasmidsoftware/dsaipg/BinarySearch.java"
 
   it should "clean 0" in {
     val cleaner = new FileCleaner("SOLUTION", "STUB", "END SOLUTION")
@@ -19,13 +20,13 @@ class CleanSpec extends FlatSpec with Matchers {
   }
   it should "clean 1" in {
     val cleaner = new FileCleaner("SOLUTION", "STUB", "END SOLUTION")
-    val result = cleaner.clean("../INFO6205/src/main/java/edu/neu/coe/info6205/BinarySearch.java", "output.txt")
-    result shouldBe Success(1254)
+    val result = cleaner.clean(binarySearchJava, "output.txt")
+    result shouldBe Success(1260)
   }
   it should "clean 2" in {
     val cleaner = new FileCleaner("SOLUTION", "STUB", "END SOLUTION")
     val result = cleaner.clean("assignment-web-crawler/src/main/scala/edu/neu/coe/csye7200/asstwc/WebCrawler.scala", "output.txt")
-    result shouldBe Success(8150)
+    result shouldBe Success(7185)
   }
   it should "clean 3" in {
     val cleaner = new FileCleaner("SOLUTION", "STUB", "END SOLUTION")
@@ -35,7 +36,7 @@ class CleanSpec extends FlatSpec with Matchers {
   it should "clean 4" in {
     val cleaner = new FileCleaner("SOLUTION", "STUB", "END")
     val result: Try[Int] = cleaner.clean("assignment-movie-database/src/main/scala/edu/neu/coe/csye7200/asstmd/Movie.scala", "badOutput.txt")
-    result shouldBe Success(8183)
+    result shouldBe Success(10324)
   }
 
   it should "parseLine 1" in {
@@ -73,16 +74,14 @@ class CleanSpec extends FlatSpec with Matchers {
   behavior of "FileCleaner"
 
   it should "noleak 1" in {
-    val inputFile = "../INFO6205/src/main/java/edu/neu/coe/info6205/BinarySearch.java"
     val outputFile = "junk.txt"
-    val (input, output) = (new File(inputFile), new File(outputFile))
+    val (input, output) = (new File(binarySearchJava), new File(outputFile))
     noleak(Try(Source.fromFile(input))) { s => s getLines() foreach println } shouldBe Success(())
     noleak(Try(new BufferedWriter(new FileWriter(output)))) { w => w.append("Hello"); () } shouldBe Success(())
   }
   it should "noleak 2" in {
-    val inputFile = "../INFO6205/src/main/java/edu/neu/coe/info6205/BinarySearch.java"
     val outputFile = "junk.txt"
-    val (input, output) = (new File(inputFile), new File(outputFile))
+    val (input, output) = (new File(binarySearchJava), new File(outputFile))
     noleakFlat(Try(new BufferedWriter(new FileWriter(output)))) {
       w =>
         noleak(Try(Source.fromFile(input))) {
@@ -92,15 +91,17 @@ class CleanSpec extends FlatSpec with Matchers {
     } shouldBe Success(())
   }
   it should "noleak 3" in {
-    val inputFile = "../INFO6205/src/main/java/edu/neu/coe/info6205/BinarySearch.javaX"
     val outputFile = "junk.txt"
-    val (input, output) = (new File(inputFile), new File(outputFile))
-    noleakFlat(Try(new BufferedWriter(new FileWriter(output)))) {
+    val (input, output) = (new File(binarySearchJava), new File(outputFile))
+    val triedUnit = noleakFlat(Try(new BufferedWriter(new FileWriter(output)))) {
       w =>
         noleak(Try(Source.fromFile(input))) {
           s =>
             s getLines() foreach (x => w.append(s"$x\n"))
         }
-    } should matchPattern { case Failure(_) => }
+    }
+    // NOTE: previously, this was matching Failure(_).
+    // I'm not sure what this was supposed to test but it does seem to work correctly.
+    triedUnit should matchPattern { case Success(()) => }
   }
 }

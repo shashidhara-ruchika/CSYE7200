@@ -13,28 +13,32 @@ class ArithImprovedSpec extends AnyFlatSpec with Matchers {
   it should "parse 1" in {
     val r = parser.parseAll(parser.factor, "1")
     r should matchPattern { case parser.Success(_, _) => }
-    r.get shouldBe parser.FloatingPoint("1")
+    r.get shouldBe parser.Coefficient(1.0)
   }
   it should "parse (1)" in {
     val r = parser.parseAll(parser.factor, "(1)")
     r should matchPattern { case parser.Success(_, _) => }
-    r.get shouldBe parser.Parentheses(parser.Expr(parser.Term(parser.FloatingPoint("1"), Nil), Nil))
+    r.get shouldBe parser.Parentheses(parser.Expr(parser.Term(parser.Coefficient(1.0), Nil), Nil))
   }
   it should "parse pi" in {
     val r = parser.parseAll(parser.factor, "pi")
     r should matchPattern { case parser.Failure("factor", _) => }
+  }
+  it should "parse very large number" in {
+    val r = parser.parseAll(parser.factor, "1E309")
+    r should matchPattern { case parser.Success(parser.Coefficient(Double.PositiveInfinity), _) => }
   }
 
   behavior of "term"
   it should "parse 1" in {
     val r = parser.parseAll(parser.term, "1")
     r should matchPattern { case parser.Success(_, _) => }
-    r.get shouldBe parser.Term(parser.FloatingPoint("1"), Nil)
+    r.get shouldBe parser.Term(parser.Coefficient(1.0), Nil)
   }
   it should "parse 1*2" in {
     val r = parser.parseAll(parser.term, "1*2")
     r should matchPattern { case parser.Success(_, _) => }
-    r.get shouldBe parser.Term(parser.FloatingPoint("1"), List(parser.~("*", parser.FloatingPoint("2"))))
+    r.get shouldBe parser.Term(parser.Coefficient(1.0), List(parser.~("*", parser.Coefficient(2.0))))
   }
   it should "parse pi" in {
     val r = parser.parseAll(parser.term, "pi")
