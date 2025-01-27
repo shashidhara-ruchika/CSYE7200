@@ -156,8 +156,11 @@ object TitanicDatasetAnalyzer {
         println(s"\n\n4. Number of passengers who could possibly be Jack: ${possibleJackCount}")
 
 
+        println("\n\nI have considered the \"Age Filled\" column (Empty values of Age were filled with its mean grouped by Pclass & Sex) " +
+            "\nto ensure that all passengers fall into a category")
+
         // 5. Split the age for every 10 years. 1-10 as one age group, 11- 20 as another etc.
-        println("\n\n5. Splitting Age Group for every 10 years:")
+        println("\n5. Splitting Age Group for every 10 years:")
         val titanicDfWithAgeGrouped = titanicDf.withColumn("AgeGroup",
             when(col("AgeFilled") > 0 && col("AgeFilled") <= 10, "0-10")
                 .when(col("AgeFilled") > 10 && col("AgeFilled") <= 20, "11-20")
@@ -186,7 +189,7 @@ object TitanicDatasetAnalyzer {
         val highestSurvivalAgeGroup = ageGroupStatisticsDf.orderBy(desc("SurvivalPercentage")).first()
 
         // Which age group most likely survived ?
-        println(s"\nAge Group with the highest survival percentage: ${highestSurvivalAgeGroup.getAs[String]("AgeGroup")}\n\n")
+        println(s"\nAge Group with the highest survival percentage: ${highestSurvivalAgeGroup.getAs[String]("AgeGroup")}")
     }
 
 }
