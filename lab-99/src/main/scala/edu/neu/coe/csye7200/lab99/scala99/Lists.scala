@@ -4,8 +4,6 @@
 
 package edu.neu.coe.csye7200.lab99.scala99
 
-import edu.neu.coe.csye7200.lab99.scala99.P07.ListAny
-
 import scala.annotation.tailrec
 
 object P00 {
@@ -129,14 +127,14 @@ object P07 {
         //        def inner(xs: ListAny, r: List[Any]): ListAny = xs match {
         //            case Nil => r
         //            case (h: List[_]) :: t => inner(h ++ t, r)
-        //            case h :: t => inner(t, r :+ h) // this is O(n)
+        //            case h :: t => inner(t, r :+ h) // :+ i.e. appending to end of list is O(n)
         //        }
 
         @scala.annotation.tailrec
         def inner(xs: ListAny, r: List[Any]): ListAny = xs match {
             case Nil => r.reverse // reverse is O(n)
             case (h: List[_]) :: t => inner(h ++ t, r)
-            case h :: t => inner(t, h :: r)
+            case h :: t => inner(t, h :: r) // :: prepending to list is O(1)
         }
 
         inner(xs, Nil)
