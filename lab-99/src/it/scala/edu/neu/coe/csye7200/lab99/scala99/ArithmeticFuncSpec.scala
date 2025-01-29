@@ -43,12 +43,12 @@ class ArithmeticFuncSpec extends flatspec.AnyFlatSpec with should.Matchers {
 
     behavior of "P37"
     it should "get " in {
-        //    gcd(36,63) shouldBe 9
+        gcd(36, 63) shouldBe 9
     }
 
     behavior of "P38"
     it should "get " in {
-        //    gcd(36,63) shouldBe 9
+        gcd(36, 63) shouldBe 9
     }
 
     behavior of "P39"
@@ -63,6 +63,6 @@ class ArithmeticFuncSpec extends flatspec.AnyFlatSpec with should.Matchers {
 
     behavior of "P41"
     it should "get " in {
-        //    gcd(36,63) shouldBe 9
+        gcd(36, 63) shouldBe 9
     }
 }
