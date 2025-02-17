@@ -80,7 +80,7 @@ case class Principal(name: Name, facebookLikes: Int) {
   */
 case class Name(first: String, middle: Option[String], last: String, suffix: Option[String]) {
   override def toString = s"$first ${middle.getOrElse("")} $last ${suffix.getOrElse("")}"
-  /* Removed an extra { that was present in string representation */
+  /* Removed an extra } that was present in string representation */
 }
 
 /**
