@@ -79,7 +79,8 @@ case class Principal(name: Name, facebookLikes: Int) {
   * @param suffix suffix
   */
 case class Name(first: String, middle: Option[String], last: String, suffix: Option[String]) {
-  override def toString = s"$first ${middle.getOrElse("")} $last ${suffix.getOrElse("")}}"
+  override def toString = s"$first ${middle.getOrElse("")} $last ${suffix.getOrElse("")}"
+  /* Removed an extra } that was present in string representation */
 }
 
 /**
@@ -101,8 +102,8 @@ object Movie extends App {
      * @return a Try[Movie]
      */
     def parse(w: String): Try[Movie] = {
-// TO BE IMPLEMENTED 
-       Try(???)
+// TO BE IMPLEMENTED
+       Try(Movie(w.split(",").toSeq))
       // END
     }
   }
@@ -136,8 +137,8 @@ object Movie extends App {
     // Hint: form a new list which is consisted by the elements in list in position indices. Int* means array of Int.
     // 6 points
     val result: Seq[String] = {
-      // TO BE IMPLEMENTED 
-       ???
+      // TO BE IMPLEMENTED
+      indices.map(list(_))
       // END
     }
     result.toList
@@ -260,7 +261,10 @@ object Rating {
   // 13 points
   def apply(s: String): Rating = s match {
     case rRating("Unrated" | "Approved" | "Not Rated" | "" | "NULL" | null, _, _) => throw ParseException(s"parse error in Rating: $s")
-// TO BE IMPLEMENTED 
+// TO BE IMPLEMENTED
+    case rRating(code, _, ageString) =>
+      val age = Try(ageString.toInt).toOption
+      Rating(code, age)
 // END
     case _ => throw ParseException(s"parse error in Rating: $s")
   }
