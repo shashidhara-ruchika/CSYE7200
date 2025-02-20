@@ -23,7 +23,7 @@ class Arithmetic(val x: Int) {
     // P34
     def totientP34: Int =
         // TO BE IMPLEMENTED
-        ???
+        (1 until x).count(_.isCoprimeTo(x))
 
     // P37
     def totient: Int = // SOLUTION
@@ -42,13 +42,19 @@ class Arithmetic(val x: Int) {
     // P36
     def primeFactorMultiplicity: Map[Int, Int] = {
         // TO BE IMPLEMENTED
-        ???
+        primeFactors.groupBy(identity).view.mapValues(_.size).toMap
     }
 
     // P40
     def goldbach: (Int, Int) =
         // TO BE IMPLEMENTED
-        ???
+    {
+        require(x > 2 && x % 2 == 0, "Goldbach's conjecture applies only to even numbers greater than 2")
+        primes.takeWhile(_ < x).find(p => (x - p).isPrime) match {
+            case Some(p) => (p, x - p)
+            case None => throw new IllegalArgumentException("Goldbach's conjecture failed (which is highly unlikely)")
+        }
+    }
 }
 
 object Arithmetic {
@@ -66,18 +72,25 @@ object Arithmetic {
     // P39
     def listPrimesInRange(r: Range): Seq[Int] =
         // TO BE IMPLEMENTED
-        ???
+        r.filter(_.isPrime)
+
 
     // P41
     def printGoldbachList(r: Range): Unit = {
         // TO BE IMPLEMENTED
-        ???
+        r.filter(n => n > 2 && n % 2 == 0).foreach { n =>
+            val (p1, p2) = n.goldbach
+            println(s"$n = $p1 + $p2")
+        }
     }
 
     // P41
     def printGoldbachListLimited(r: Range, limit: Int): Unit = {
         // TO BE IMPLEMENTED
-        ???
+        r.filter(n => n > 2 && n % 2 == 0).foreach { n =>
+            val (p1, p2) = n.goldbach
+            if (p1 > limit) println(s"$n = $p1 + $p2")
+        }
     }
 
 }
