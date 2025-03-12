@@ -40,7 +40,7 @@ trait RandomState[T] {
   // 10 points
   def flatMap[U](f: T => RandomState[U]): RandomState[U] = {
 // TO BE IMPLEMENTED 
-???
+    f(get)
   }
 
   /**
@@ -50,7 +50,8 @@ trait RandomState[T] {
   // 12 points
   def toStream: LazyList[T] = {
 // TO BE IMPLEMENTED 
-???
+//    get #:: next.toStream
+    LazyList.cons(get, next.toStream)
   }
 }
 
@@ -66,7 +67,7 @@ case class JavaRandomState[T](n: Long, g: Long => T) extends RandomState[T] {
   // 7 points
   def next: RandomState[T] = {
 // TO BE IMPLEMENTED 
-???
+    JavaRandomState(new Random(n).nextLong(), g)
   }
 
   /*END*/
@@ -74,7 +75,7 @@ case class JavaRandomState[T](n: Long, g: Long => T) extends RandomState[T] {
   // 5 points
   def get: T = {
 // TO BE IMPLEMENTED 
-???
+    g(n)
   }
 
   /*END*/
@@ -82,7 +83,7 @@ case class JavaRandomState[T](n: Long, g: Long => T) extends RandomState[T] {
   // 13 points
   def map[U](f: T => U): RandomState[U] = {
 // TO BE IMPLEMENTED 
-???
+    JavaRandomState(n, f compose g)
   }
 }
 
@@ -115,7 +116,7 @@ object RandomState {
   // 4 points
   val longToDouble: Long => Double =
 // TO BE IMPLEMENTED 
-???
+  _.toDouble / Long.MaxValue
   val doubleToUniformDouble: Double => UniformDouble = { x => UniformDouble((x + 1) / 2) }
 }
 
