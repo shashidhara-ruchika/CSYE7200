@@ -52,3 +52,14 @@ object FutureExercise extends App {
   Await.ready(expected, 10000 milli)
   println("Goodbye")
 }
+
+object FutureExercise2 extends App {
+  import scala.concurrent.ExecutionContext.Implicits.global
+  val chunk = 10000 // Try it first with chunk = 10000 and build up to 1000000
+  def integers(i: Int, n: Int): LazyList[Int] = LazyList.from(i) take n
+  def sum[N : Numeric](is: LazyList[N]): BigInt = is.foldLeft(BigInt(0))(_+implicitly[Numeric[N]].toLong(_))
+  def asyncSum(is: LazyList[Int]): Future[BigInt] = Future {val x = sum(is); System.err.println(s"${is.head} is done with sum $x"); x}
+  val xfs = for (i <- 0 to 10) yield asyncSum(integers(i * chunk, chunk))
+  val xsf = Future.sequence(xfs)
+  val xf: Future[BigInt] = for (ls <- xsf) yield ls.sum
+}
