@@ -33,22 +33,22 @@ class ArithmeticFuncSpec extends flatspec.AnyFlatSpec with should.Matchers {
 
   behavior of "P35"
   it should "get 3,3,5,7 for 315" in {
-    315.primeFactors shouldBe List(3, 3, 5, 7)
+    315.primeFactors shouldBe List(3, 5, 7)
   }
 
   behavior of "P36"
-  it should "get 3->2, 5->1, 7->1 for 315" in {
-    315.primeFactorMultiplicity shouldBe Map(3 -> 2, 5 -> 1, 7 -> 1)
+  it should "get 3->1, 5->1, 7->1 for 315" in {
+    315.primeFactorMultiplicity shouldBe Map(3 -> 1, 5 -> 1, 7 -> 1)
   }
 
   behavior of "P37"
   it should "get " in {
-//    gcd(36,63) shouldBe 9
+    gcd(36,63) shouldBe 9
   }
 
   behavior of "P38"
   it should "get " in {
-//    gcd(36,63) shouldBe 9
+    gcd(36,63) shouldBe 9
   }
 
   behavior of "P39"
@@ -63,6 +63,6 @@ class ArithmeticFuncSpec extends flatspec.AnyFlatSpec with should.Matchers {
 
   behavior of "P41"
   it should "get " in {
-//    gcd(36,63) shouldBe 9
+    gcd(36,63) shouldBe 9
   }
 }
