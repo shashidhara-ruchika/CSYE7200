@@ -9,7 +9,7 @@ import scala.util.{Failure, Success}
 object SpotifyClient {
 
     def getPlayListTracks(playListId: String, offset: Int = 0, limit: Int = 25): Option[PlaylistTracksPart] = {
-        println(s"Fetching playlist tracks for $playListId with offset $offset and limit $limit")
+        println(s"[INFO] Fetching playlist tracks for $playListId with offset $offset and limit $limit")
         val playListUrl = s"https://api.spotify.com/v1/playlists/$playListId/tracks?offset=$offset&limit=$limit"
         val response = ApiClient.get(
             playListUrl,
@@ -42,7 +42,8 @@ object SpotifyClient {
         }
     }
 
-    def getArtist(artistId: String): Option[List[Artist]] = {
+    def getArtist(artistId: String): Option[Artist] = {
+        println(s"[INFO] Fetching artist details for $artistId")
         val artistUrl = s"https://api.spotify.com/v1/artists/$artistId"
         val response = ApiClient.get(
             artistUrl,
@@ -57,7 +58,7 @@ object SpotifyClient {
                     json("name").str,
                     json("followers")("total").num.toInt
                 )
-                Some(List(artist))
+                Some(artist)
             case Failure(_) => None
         }
     }

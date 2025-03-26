@@ -56,9 +56,9 @@ object TrackProcessor {
         artistIdsDF.collect().foreach { row =>
             val artistId = row.getString(0)
             SpotifyClient.getArtist(artistId) match {
-                case Some(artistList) =>
-                    val batchDF = artistList.toDF()
-                    artistsDF = artistsDF.union(batchDF)
+                case Some(artist) =>
+                    val artistDF = Seq(artist).toDF()
+                    artistsDF = artistsDF.union(artistDF)
                 case None => println(s"Failed to fetch artist details for $artistId")
             }
         }
