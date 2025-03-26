@@ -2,58 +2,72 @@ package spotify
 
 import common.Config
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.streaming.{Seconds, StreamingContext}
-import spotify.dao.Track
-
-import scala.collection.mutable
+import org.apache.spark.sql.functions._
+import spotify.dao.{Artist, Track}
 
 object TrackProcessor {
 
-    def getTop10LongestPlayListTracks(playListId: String): Option[List[Track]] = {
+    def main(args: Array[String]): Unit = {
+
+        if (args.length < 1) {
+            println("Usage: TrackProcessor <playlist_id>")
+            return
+        }
+        val playlistId = args(0)
+
         val spark = SparkSession.builder()
-            .appName("Spotify Top 10 Longest PlayList Tracks")
+            .appName("SpotifyTrackProcessor")
             .master("local[*]")
             .getOrCreate()
+        spark.sparkContext.setLogLevel("ERROR")
 
-        spark.sparkContext.setLogLevel("ERROR") // Ignore all the INFO and WARN messages
+        import spark.implicits._
 
-        val ssc = new StreamingContext(spark.sparkContext, Seconds(Config.trackProcessorBatchDuration))
-        val rddQueue = new mutable.Queue[org.apache.spark.rdd.RDD[Track]]()
+        var offset = 0
+        val limit = Config.trackProcessorBatchSize
 
-        val inputStream = ssc.queueStream(rddQueue)
+        // Initialize an empty DataFrame
+        var tracksDF = spark.emptyDataset[Track].toDF()
 
-        implicit val trackOrdering: Ordering[Track] = Ordering.by(_.duration_ms)
-        val top10LongestTracks = mutable.PriorityQueue.empty[Track]
-
-        inputStream.foreachRDD { rdd =>
-            val batchTracks = rdd.collect()
-            top10LongestTracks ++= batchTracks
-            while (top10LongestTracks.size > 10) {
-                top10LongestTracks.dequeue()
+        var totalTracks = Int.MaxValue
+        while (offset < totalTracks) {
+            SpotifyClient.getPlayListTracks(playlistId, offset, limit) match {
+                case Some(part) =>
+                    val batchDF = part.tracks.toDF()
+                    tracksDF = tracksDF.union(batchDF)
+                    totalTracks = part.total
+                    offset += limit
+                case None =>
+                    println("Failed to fetch playlist tracks.")
+                    return
             }
         }
 
-        ssc.start()
+        val topTracksDF = tracksDF.orderBy(desc("duration_ms")).limit(10)
 
-        var offset = 0
-        var totalTracks = 0
-        val batchSize = Config.trackProcessorBatchSize
+        topTracksDF.select("name", "duration_ms").show(false)
+        println("[Assignment] Top 10 Tracks")
 
-        do {
-            SpotifyClient.getPlayListTracks(playListId, offset * batchSize, batchSize) match {
-                case Some(playlistTracksPart) =>
-                    totalTracks = playlistTracksPart.total
-                    rddQueue += ssc.sparkContext.parallelize(playlistTracksPart.tracks)
-                    offset += 1
-                case None => return None
+        val artistIdsDF = topTracksDF.select(explode(col("artist_ids")).as("artist_id")).distinct()
+
+        // Initialize an empty DataFrame for artists
+        var artistsDF = spark.emptyDataset[Artist].toDF()
+
+        artistIdsDF.collect().foreach { row =>
+            val artistId = row.getString(0)
+            SpotifyClient.getArtist(artistId) match {
+                case Some(artistList) =>
+                    val batchDF = artistList.toDF()
+                    artistsDF = artistsDF.union(batchDF)
+                case None => println(s"Failed to fetch artist details for $artistId")
             }
-        } while (offset * batchSize < totalTracks)
+        }
 
-        ssc.awaitTerminationOrTimeout(30000) // 30 seconds
+        val rankedArtistsDF = artistsDF.orderBy(desc("followers_count"))
+
+        rankedArtistsDF.select("name", "followers_count").show(false)
+        println("[Assignment] Artists by follower count of Top 10 Tracks")
 
         spark.stop()
-
-        Some(top10LongestTracks.dequeueAll.toList)
     }
-
 }
