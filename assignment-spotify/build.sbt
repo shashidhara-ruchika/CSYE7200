@@ -18,6 +18,7 @@ libraryDependencies ++= Seq(
     // Apache Spark for data processing
     "org.apache.spark" %% "spark-core" % "3.3.0",
     "org.apache.spark" %% "spark-sql" % "3.3.0",
+    "org.apache.spark" %% "spark-streaming" % "3.3.0",
 
     // Logging for better debugging
     "ch.qos.logback" % "logback-classic" % "1.4.7",

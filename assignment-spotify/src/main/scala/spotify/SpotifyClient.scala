@@ -1,15 +1,15 @@
 package spotify
 
 import common.ApiClient
-import spotify.dao.Track
-import spotify.dao.Artist
+import spotify.dao.{Artist, PlaylistTracksPart, Track}
 import upickle.default.read
 
 import scala.util.{Failure, Success}
 
 object SpotifyClient {
 
-    def getPlayListTracks(playListId: String, offset: Int = 0, limit: Int = 25): Option[List[Track]] = {
+    def getPlayListTracks(playListId: String, offset: Int = 0, limit: Int = 25): Option[PlaylistTracksPart] = {
+        println(s"Fetching playlist tracks for $playListId with offset $offset and limit $limit")
         val playListUrl = s"https://api.spotify.com/v1/playlists/$playListId/tracks?offset=$offset&limit=$limit"
         val response = ApiClient.get(
             playListUrl,
@@ -30,7 +30,14 @@ object SpotifyClient {
                             artistIds
                         )
                 }.toList
-                Some(tracks)
+                val playlistPart = PlaylistTracksPart(
+                    playListId,
+                    json("offset").num.toInt,
+                    json("limit").num.toInt,
+                    json("total").num.toInt,
+                    tracks
+                )
+                Some(playlistPart)
             case Failure(_) => None
         }
     }

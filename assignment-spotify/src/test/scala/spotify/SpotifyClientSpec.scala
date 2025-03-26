@@ -2,7 +2,7 @@ package spotify
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import spotify.dao.{Artist, Track}
+import spotify.dao.{Artist, PlaylistTracksPart, Track}
 
 class SpotifyClientSpec extends AnyFlatSpec with Matchers {
 
@@ -11,12 +11,16 @@ class SpotifyClientSpec extends AnyFlatSpec with Matchers {
         val offset = 0
         val limit = 25
 
-        val optionalTracks: Option[List[Track]] = SpotifyClient.getPlayListTracks(playListId, offset, limit)
+        val optionalTracks: Option[PlaylistTracksPart] = SpotifyClient.getPlayListTracks(playListId, offset, limit)
 
         optionalTracks match {
-            case Some(tracks) =>
-                tracks should not be empty
-                tracks.foreach { track =>
+            case Some(playlistTracksPart: PlaylistTracksPart) =>
+                playlistTracksPart.playListId should not be empty
+                playlistTracksPart.offset should be >= 0
+                playlistTracksPart.limit should be > 0
+                playlistTracksPart.total should be >= 0
+                playlistTracksPart.tracks should not be empty
+                playlistTracksPart.tracks.foreach { track =>
                     track.id should not be empty
                     track.name should not be empty
                     track.duration_ms should be > 0
