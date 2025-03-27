@@ -1,3 +1,5 @@
+import scala.collection.Seq
+
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "2.13.16"
@@ -28,5 +30,12 @@ libraryDependencies ++= Seq(
 
     // Scala Mock
     "org.scalamock" %% "scalamock" % "5.1.0" % Test
+)
+
+javaOptions ++= Seq(
+    "--add-opens", "java.base/java.nio=ALL-UNNAMED",
+    "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED",
+    "--add-opens", "java.base/java.util=ALL-UNNAMED",
+    "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED"
 )
 

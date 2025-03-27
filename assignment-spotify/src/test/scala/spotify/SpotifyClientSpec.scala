@@ -33,16 +33,13 @@ class SpotifyClientSpec extends AnyFlatSpec with Matchers {
     it should "fetch artist successfully" in {
         val artistId = "3koiLjNrgRTNbOwViDipeA"
 
-        val optionalArtists: Option[List[Artist]] = SpotifyClient.getArtist(artistId)
+        val optionalArtists: Option[Artist] = SpotifyClient.getArtist(artistId)
 
         optionalArtists match {
-            case Some(artists) =>
-                artists should not be empty
-                artists.foreach { artist =>
-                    artist.id should not be empty
-                    artist.name should not be empty
-                    artist.followers_count should be > 0
-                }
+            case Some(artist) =>
+                artist.id should not be empty
+                artist.name should not be empty
+                artist.followers_count should be > 0
             case None => fail("Failed to fetch artist")
         }
     }
