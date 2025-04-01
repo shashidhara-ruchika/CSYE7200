@@ -2,6 +2,8 @@ name := "WebCrawler"
 
 version := "1.0"
 
+scalaVersion := "2.13.6"
+
 Compile / doc / scalacOptions ++= Seq("-Vimplicits", "-deprecation", "-Ywarn-dead-code", "-Ywarn-value-discard", "-Ywarn-unused")
 scalacOptions ++= Seq("-encoding", "UTF-8")
 
