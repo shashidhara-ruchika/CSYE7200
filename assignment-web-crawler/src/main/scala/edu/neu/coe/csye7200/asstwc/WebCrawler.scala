@@ -141,7 +141,10 @@ object WebCrawler extends App {
     // You will also need FP.asFuture
     // 9 points.
     // TO BE IMPLEMENTED 
-     ???
+    for {
+      content: String <- getURLContent(url)
+      links: Seq[URL] <- Future.fromTry(getLinks(content, url))
+    } yield links
     // END SOLUTION
 
   /**
@@ -172,8 +175,13 @@ object WebCrawler extends App {
    * @return a sequence of `Try[URL]` objects, representing the valid URLs extracted and resolved from the node.
    */
   def getURLs(node: Node, url: URL): Seq[Try[URL]] =
-// TO BE IMPLEMENTED 
- ???
+// TO BE IMPLEMENTED
+      for {
+          a: Node <- node \\ "a"
+          href: Node <- a \ "@href"
+          u: Try[URL] = createRelURL(Some(url), href.text)
+          v: Try[URL] = u.flatMap(validateURL)
+      } yield v
 // END SOLUTION
 
   /**
